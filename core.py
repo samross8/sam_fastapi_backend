@@ -1,52 +1,56 @@
 from models import Pick
+from datetime import datetime
 
 def generate_cheatsheet(day: str):
-    # Demo picks — replace with model-driven picks later
+    # For demo purposes, this assumes it's for May 17
+    # Replace this logic with scraper-driven inputs for future versions
+
+    # --- Simulated Cheat Sheet Picks ---
     picks = {
         "Moneyline": [
-            Pick(label="Guardians ML", confidence=9.2),
-            Pick(label="Padres ML", confidence=8.8),
-            Pick(label="Rays ML", confidence=8.4),
+            Pick(label="Rays ML", confidence=9.20),
+            Pick(label="Blue Jays ML", confidence=8.85),
+            Pick(label="Guardians ML", confidence=8.60),
         ],
         "RunLine": [
-            Pick(label="Phillies +1.5", confidence=9.4),
-            Pick(label="Twins +1.5", confidence=8.85),
-            Pick(label="Cubs +1.5", confidence=8.5),
+            Pick(label="Padres +1.5", confidence=9.35),
+            Pick(label="Tigers +1.5", confidence=8.90),
+            Pick(label="Nationals +1.5", confidence=8.70),
         ],
         "NRFI": [
-            Pick(label="Tigers vs Blue Jays", confidence=9.1),
-            Pick(label="Reds vs Marlins", confidence=8.6),
+            Pick(label="NRFI – Braves vs Padres", confidence=9.10),
+            Pick(label="NRFI – Rays vs Blue Jays", confidence=8.60),
         ],
         "Hits": [
-            Pick(label="Luis Arraez 1+ Hit", confidence=9.3),
-            Pick(label="Juan Soto 1+ Hit", confidence=8.95),
+            Pick(label="Luis Arraez 1+ Hit", confidence=9.25),
+            Pick(label="Bryce Harper 1+ Hit", confidence=8.95),
         ],
         "HR": [
-            Pick(label="Yordan Alvarez HR", confidence=8.6),
-            Pick(label="Matt Olson HR", confidence=8.25),
+            Pick(label="Kyle Schwarber HR", confidence=8.55),
+            Pick(label="Aaron Judge HR", confidence=8.10),
         ]
     }
 
-    # Build Parlay Suite
-    sorted_all = sorted(
-        [(cat, p) for cat in picks for p in picks[cat]],
+    # --- Parlay Suite Tier Logic ---
+    all_picks = sorted(
+        [(cat, pick) for cat, plist in picks.items() for pick in plist],
         key=lambda x: x[1].confidence,
         reverse=True
     )
 
-    def slice_confidence(start, end):
-        return [p for _, p in sorted_all if start <= p.confidence < end]
+    def tier(start, end):
+        return [p.dict() for _, p in all_picks if start <= p.confidence < end]
 
     parlay_suite = {
-        "best_bet": [sorted_all[0][1]],
-        "doubloon_doubler_1": slice_confidence(9.0, 9.3),
-        "doubloon_doubler_2": slice_confidence(8.7, 9.0),
-        "mini_lotto": slice_confidence(8.4, 8.7),
-        "lotto_play": slice_confidence(0, 8.4)
+        "best_bet": [all_picks[0][1].dict()],
+        "doubloon_doubler_1": tier(9.0, 9.3),
+        "doubloon_doubler_2": tier(8.7, 9.0),
+        "mini_lotto": tier(8.4, 8.7),
+        "lotto_play": tier(0.0, 8.4)
     }
 
-    # Convert all Pick() models to .dict() for safe JSON serialization
+    # --- Final Output ---
     return {
-        "cheatsheet": {k: [p.dict() for p in v] for k, v in picks.items()},
-        "parlay_suite": {k: [p.dict() for p in v] for k, v in parlay_suite.items()}
+        "cheatsheet": {cat: [p.dict() for p in plist] for cat, plist in picks.items()},
+        "parlay_suite": parlay_suite
     }
