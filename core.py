@@ -1,61 +1,61 @@
 from models import Pick
 from datetime import datetime
 
-def generate_cheatsheet(day: str):
-    # Simulated real matchups (normally pulled from Baseball Savant or Lineups.com)
-    matchups = [
-        {
-            "matchup": "Rays @ Blue Jays",
-            "pitchers": "Z. Eflin vs K. Gausman",
-            "start_time_et": "1:07 PM ET",
-            "projected_flow": "Tight early, Rays pull ahead mid-game. Bullpen edge Toronto."
-        },
+def get_today_matchups():
+    return [
         {
             "matchup": "Guardians @ Twins",
             "pitchers": "T. Bibee vs J. Ryan",
             "start_time_et": "2:10 PM ET",
-            "projected_flow": "Guardians start slow, Twins lead early. Cleveland rallies late with bullpen advantage."
+            "projected_flow": "Twins lead early. Guardians rally midgame. Bullpen edge Cleveland."
         },
         {
             "matchup": "Phillies @ Nationals",
             "pitchers": "Z. Wheeler vs M. Gore",
             "start_time_et": "4:05 PM ET",
-            "projected_flow": "Phils control early. Nationals show fight late but edge stays Philly."
+            "projected_flow": "Wheeler dominant early. Game slows late. Low total expected."
+        },
+        {
+            "matchup": "Rays @ Blue Jays",
+            "pitchers": "Z. Eflin vs K. Gausman",
+            "start_time_et": "3:07 PM ET",
+            "projected_flow": "Strong SPs cancel out early scoring. Jays likely break through 6th+."
         },
         {
             "matchup": "Padres @ Braves",
             "pitchers": "D. Cease vs C. Morton",
             "start_time_et": "7:20 PM ET",
-            "projected_flow": "Early offense both sides. Game flips in bullpen innings. Slight edge Braves."
+            "projected_flow": "Early runs both sides. Braves close stronger late behind pen."
         }
     ]
+
+def generate_cheatsheet(day: str):
+    matchups = get_today_matchups()
 
     cheat_sheet = {
         "Moneyline": [
             Pick(label="Guardians ML", confidence=9.2),
-            Pick(label="Padres ML", confidence=8.8),
+            Pick(label="Padres ML", confidence=8.85),
             Pick(label="Rays ML", confidence=8.4),
         ],
         "RunLine": [
-            Pick(label="Phillies +1.5", confidence=9.3),
+            Pick(label="Phillies +1.5", confidence=9.35),
             Pick(label="Twins +1.5", confidence=8.85),
-            Pick(label="Cubs +1.5", confidence=8.5),
         ],
         "NRFI": [
-            Pick(label="NRFI – Braves vs Padres", confidence=9.1),
-            Pick(label="NRFI – Rays vs Blue Jays", confidence=8.6),
+            Pick(label="NRFI – Rays vs Blue Jays", confidence=9.15),
+            Pick(label="NRFI – Padres vs Braves", confidence=8.6),
         ],
         "Hits": [
             Pick(label="Luis Arraez 1+ Hit", confidence=9.3),
-            Pick(label="Bryce Harper 1+ Hit", confidence=8.95),
+            Pick(label="Juan Soto 1+ Hit", confidence=8.95),
         ],
         "HR": [
-            Pick(label="Kyle Schwarber HR", confidence=8.5),
-            Pick(label="Aaron Judge HR", confidence=8.25),
+            Pick(label="Aaron Judge HR", confidence=8.55),
+            Pick(label="Matt Olson HR", confidence=8.15),
         ]
     }
 
-    # Flatten and rank all picks
     all_picks = sorted(
         [(cat, p) for cat, plist in cheat_sheet.items() for p in plist],
         key=lambda x: x[1].confidence,
@@ -88,4 +88,25 @@ def generate_cheatsheet(day: str):
         "slate_summary": matchups,
         "cheatsheet": {k: [p.dict() for p in v] for k, v in cheat_sheet.items()},
         "parlay_suite": parlay_suite
+    }
+
+def generate_preakness():
+    horses = [
+        {"name": "Mugatu", "post": 1, "win_conf": 2.1, "top3_conf": 4.8},
+        {"name": "Uncle Heavy", "post": 2, "win_conf": 4.0, "top3_conf": 7.2},
+        {"name": "Catching Freedom", "post": 3, "win_conf": 7.6, "top3_conf": 9.0},
+        {"name": "Muth (SCR)", "post": 4, "win_conf": 0.0, "top3_conf": 0.0},
+        {"name": "Mystik Dan", "post": 5, "win_conf": 9.4, "top3_conf": 9.8},
+        {"name": "Seize the Grey", "post": 6, "win_conf": 5.9, "top3_conf": 8.0},
+        {"name": "Just Steel", "post": 7, "win_conf": 4.8, "top3_conf": 7.1},
+        {"name": "Tuscan Gold", "post": 8, "win_conf": 6.5, "top3_conf": 8.6},
+        {"name": "Imagination", "post": 9, "win_conf": 8.4, "top3_conf": 9.2}
+    ]
+
+    projected_flow = "Sharp early pace from posts 1, 3, 6. Sets up for mid-pack stalkers like Mystik Dan and Imagination. Off-track experience could be key."
+
+    return {
+        "race": "Preakness Stakes – May 18",
+        "projected_flow": projected_flow,
+        "entries": horses
     }

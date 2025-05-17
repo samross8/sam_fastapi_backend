@@ -10,3 +10,7 @@ def get_today_cheatsheet():
 @app.get("/cheatsheet/tomorrow")
 def get_tomorrow_cheatsheet():
     return generate_cheatsheet(day="tomorrow")
+
+@app.get("/cheatsheet/preakness")
+def get_preakness_cheatsheet():
+    return generate_preakness()
