@@ -1,7 +1,7 @@
-from models import CheatSheetResponse, Pick
+from models import Pick
 
 def generate_cheatsheet(day: str):
-    # Static mock data for now — this will be replaced with scraped + scored inputs
+    # Demo picks — replace with model-driven picks later
     picks = {
         "Moneyline": [
             Pick(label="Guardians ML", confidence=9.2),
@@ -27,7 +27,7 @@ def generate_cheatsheet(day: str):
         ]
     }
 
-    # Construct parlay suite tiers
+    # Build Parlay Suite
     sorted_all = sorted(
         [(cat, p) for cat in picks for p in picks[cat]],
         key=lambda x: x[1].confidence,
@@ -45,7 +45,8 @@ def generate_cheatsheet(day: str):
         "lotto_play": slice_confidence(0, 8.4)
     }
 
+    # Convert all Pick() models to .dict() for safe JSON serialization
     return {
-        "cheatsheet": picks,
-        "parlay_suite": parlay_suite
+        "cheatsheet": {k: [p.dict() for p in v] for k, v in picks.items()},
+        "parlay_suite": {k: [p.dict() for p in v] for k, v in parlay_suite.items()}
     }
