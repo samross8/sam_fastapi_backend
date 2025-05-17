@@ -1,14 +1,12 @@
 from fastapi import FastAPI
 from core import generate_cheatsheet
-from models import CheatSheetResponse
 
 app = FastAPI()
 
-@app.get("/cheatsheet/today", response_model=CheatSheetResponse)
+@app.get("/cheatsheet/today")
 def get_today_cheatsheet():
     return generate_cheatsheet(day="today")
 
-@app.get("/cheatsheet/tomorrow", response_model=CheatSheetResponse)
+@app.get("/cheatsheet/tomorrow")
 def get_tomorrow_cheatsheet():
     return generate_cheatsheet(day="tomorrow")
-# Placeholder for main.py
