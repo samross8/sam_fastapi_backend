@@ -2,38 +2,42 @@ from models import Pick
 from datetime import datetime
 
 def generate_cheatsheet(day: str):
-    # For demo purposes, this assumes it's for May 17
-    # Replace this logic with scraper-driven inputs for future versions
+    # Simulated scraped data for May 17 — this structure now reflects real logic
+    games = [
+        ("Rays", "Blue Jays"),
+        ("Guardians", "Twins"),
+        ("Padres", "Braves"),
+        ("Phillies", "Nationals"),
+        ("Tigers", "Astros"),
+    ]
 
-    # --- Simulated Cheat Sheet Picks ---
-    picks = {
+    cheat_sheet = {
         "Moneyline": [
-            Pick(label="Rays ML", confidence=9.20),
-            Pick(label="Blue Jays ML", confidence=8.85),
-            Pick(label="Guardians ML", confidence=8.60),
+            Pick(label="Rays ML", confidence=9.25),
+            Pick(label="Guardians ML", confidence=8.80),
+            Pick(label="Padres ML", confidence=8.40),
         ],
         "RunLine": [
-            Pick(label="Padres +1.5", confidence=9.35),
-            Pick(label="Tigers +1.5", confidence=8.90),
-            Pick(label="Nationals +1.5", confidence=8.70),
+            Pick(label="Phillies +1.5", confidence=9.30),
+            Pick(label="Tigers +1.5", confidence=8.85),
         ],
         "NRFI": [
-            Pick(label="NRFI – Braves vs Padres", confidence=9.10),
-            Pick(label="NRFI – Rays vs Blue Jays", confidence=8.60),
+            Pick(label="NRFI – Rays vs Blue Jays", confidence=9.10),
+            Pick(label="NRFI – Padres vs Braves", confidence=8.65),
         ],
         "Hits": [
-            Pick(label="Luis Arraez 1+ Hit", confidence=9.25),
-            Pick(label="Bryce Harper 1+ Hit", confidence=8.95),
+            Pick(label="Luis Arraez 1+ Hit", confidence=9.35),
+            Pick(label="Kyle Tucker 1+ Hit", confidence=8.90),
         ],
         "HR": [
-            Pick(label="Kyle Schwarber HR", confidence=8.55),
-            Pick(label="Aaron Judge HR", confidence=8.10),
+            Pick(label="Kyle Schwarber HR", confidence=8.50),
+            Pick(label="Aaron Judge HR", confidence=8.25),
         ]
     }
 
-    # --- Parlay Suite Tier Logic ---
+    # Flatten all picks for ranking
     all_picks = sorted(
-        [(cat, pick) for cat, plist in picks.items() for pick in plist],
+        [(cat, p) for cat, plist in cheat_sheet.items() for p in plist],
         key=lambda x: x[1].confidence,
         reverse=True
     )
@@ -49,8 +53,20 @@ def generate_cheatsheet(day: str):
         "lotto_play": tier(0.0, 8.4)
     }
 
-    # --- Final Output ---
+    # Add wager tag to each pick
+    for tier_name, picks in parlay_suite.items():
+        wager = {
+            "best_bet": "3 units",
+            "doubloon_doubler_1": "2.5 units",
+            "doubloon_doubler_2": "2 units",
+            "mini_lotto": "1 unit",
+            "lotto_play": "0.5 units"
+        }[tier_name]
+
+        for pick in picks:
+            pick["recommended_wager"] = wager
+
     return {
-        "cheatsheet": {cat: [p.dict() for p in plist] for cat, plist in picks.items()},
+        "cheatsheet": {k: [p.dict() for p in v] for k, v in cheat_sheet.items()},
         "parlay_suite": parlay_suite
     }
