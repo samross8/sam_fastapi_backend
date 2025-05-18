@@ -1,4 +1,37 @@
 import requests
+from datetime import datetime
+import pytz
+
+def fetch_today_matchups():
+    url = "https://baseballsavant.mlb.com/probable-pitchers.json"
+    response = requests.get(url)
+    data = response.json()
+
+    # Get current date in US/Eastern to match the format in JSON
+    eastern = pytz.timezone("US/Eastern")
+    today_et = datetime.now(eastern).strftime("%Y-%m-%d")
+
+    matchups = []
+
+    for game in data.get("matchups", []):
+        game_date = game.get("gameDate", "").split("T")[0]
+        if game_date != today_et:
+            continue  # skip non-today games
+
+        away = game["awayProbablePitcher"]
+        home = game["homeProbablePitcher"]
+
+        matchup = {
+            "matchup": f'{game["awayTeamName"]} @ {game["homeTeamName"]}',
+            "pitchers": f'{away["firstName"][0]}. {away["lastName"]} vs {home["firstName"][0]}. {home["lastName"]}',
+            "start_time_et": game["gameDateEasternTimeString"].replace(" ET", " ET"),
+            "projected_flow": "Starting pitchers locked in. Flow projection pending full stack integration."
+        }
+
+        matchups.append(matchup)
+
+    return matchups
+import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
 import pytz
