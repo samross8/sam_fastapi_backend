@@ -1,62 +1,67 @@
-from models import Pick
+from models import CheatSheetResponse, Pick
 from scrapers.games import fetch_today_matchups
 
-def generate_cheatsheet(day: str):
-    matchups = fetch_today_matchups()
+# --- Moneyline Confidence Model ---
+def score_moneyline(game):
+    matchup = game.get("matchup", "")
+    pitchers = game.get("pitchers", "")
+    
+    try:
+        away_team, home_team = [t.strip() for t in matchup.split("@")]
+        sp_away, sp_home = [p.strip() for p in pitchers.split("vs")]
+    except:
+        return None  # Skip invalid format
 
-    # Quick example confidence logic — replace with full model scoring later
-    cheat_sheet = {
-        "Moneyline": [],
+    score = 8.0
+
+    # Example scoring logic (replace with deeper stats later)
+    score += 0.2  # Home field advantage
+    score += 0.3  # Placeholder SP edge
+    score += 0.3  # Placeholder matchup edge
+
+    return {
+        "label": f"{home_team} ML",
+        "confidence": round(score, 2)
+    }
+
+# --- Main generator ---
+def generate_cheatsheet(day: str) -> CheatSheetResponse:
+    matchups = fetch_today_matchups()
+    moneyline_picks = []
+
+    for game in matchups:
+        ml_pick = score_moneyline(game)
+        if ml_pick and ml_pick["confidence"] >= 8.0:
+            moneyline_picks.append(Pick(**ml_pick))
+
+    picks = {
+        "Moneyline": moneyline_picks,
         "RunLine": [],
         "NRFI": [],
         "Hits": [],
         "HR": []
     }
 
-    for game in matchups:
-        home = game["matchup"].split("@")[1].strip()
-        away = game["matchup"].split("@")[0].strip()
-        home_team = home.split()[0]
-        away_team = away.split()[0]
+    all_picks = []
+    for cat, plist in picks.items():
+        for p in plist:
+            all_picks.append((cat, p))
 
-        # Sample logic — inject your model logic here
-        cheat_sheet["Moneyline"].append(Pick(label=f"{home_team} ML", confidence=8.7))
-        cheat_sheet["RunLine"].append(Pick(label=f"{away_team} +1.5", confidence=9.1))
-        cheat_sheet["NRFI"].append(Pick(label=f"NRFI – {game['matchup']}", confidence=8.9))
-        cheat_sheet["Hits"].append(Pick(label="Luis Arraez 1+ Hit", confidence=9.3))
-        cheat_sheet["HR"].append(Pick(label="Aaron Judge HR", confidence=8.2))
+    all_picks.sort(key=lambda x: x[1].confidence, reverse=True)
 
-    # Flatten and rank all picks
-    all_picks = sorted(
-        [(cat, p) for cat, plist in cheat_sheet.items() for p in plist],
-        key=lambda x: x[1].confidence,
-        reverse=True
-    )
-
-    def tier(start, end):
-        return [p.dict() for _, p in all_picks if start <= p.confidence < end]
+    def slice_confidence(start, end):
+        return [p for _, p in all_picks if start <= p.confidence < end]
 
     parlay_suite = {
         "best_bet": [all_picks[0][1].dict()] if all_picks else [],
-        "doubloon_doubler_1": tier(9.0, 9.3),
-        "doubloon_doubler_2": tier(8.7, 9.0),
-        "mini_lotto": tier(8.4, 8.7),
-        "lotto_play": tier(0.0, 8.4)
+        "doubloon_doubler_1": [p.dict() for p in slice_confidence(9.0, 9.3)],
+        "doubloon_doubler_2": [p.dict() for p in slice_confidence(8.7, 9.0)],
+        "mini_lotto": [p.dict() for p in slice_confidence(8.4, 8.7)],
+        "lotto_play": [p.dict() for p in slice_confidence(0, 8.4)]
     }
 
-    for tier_name, picks in parlay_suite.items():
-        wager = {
-            "best_bet": "3 units",
-            "doubloon_doubler_1": "2.5 units",
-            "doubloon_doubler_2": "2 units",
-            "mini_lotto": "1 unit",
-            "lotto_play": "0.5 units"
-        }[tier_name]
-        for pick in picks:
-            pick["recommended_wager"] = wager
-
-    return {
-        "slate_summary": matchups,
-        "cheatsheet": {k: [p.dict() for p in v] for k, v in cheat_sheet.items()},
-        "parlay_suite": parlay_suite
-    }
+    return CheatSheetResponse(
+        slate_summary=matchups,
+        cheatsheet=picks,
+        parlay_suite=parlay_suite
+    )
