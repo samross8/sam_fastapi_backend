@@ -1,85 +1,32 @@
 from models import Pick
-from datetime import datetime
-
-def get_may18_matchups():
-    return [
-        {
-            "matchup": "Brewers @ Astros",
-            "pitchers": "T. Megill vs J. Verlander",
-            "start_time_et": "2:10 PM ET",
-            "projected_flow": "Astros start fast. Brewers fight midgame. Slight edge Astros late."
-        },
-        {
-            "matchup": "Rays @ Blue Jays",
-            "pitchers": "T. Bradley vs Y. Kikuchi",
-            "start_time_et": "1:37 PM ET",
-            "projected_flow": "Rays pressure early. Jays strike late. Bullpen edge Tampa."
-        },
-        {
-            "matchup": "Nationals @ Phillies",
-            "pitchers": "T. Williams vs C. Sanchez",
-            "start_time_et": "1:35 PM ET",
-            "projected_flow": "Phillies control early. Nats surge in 6th+. Bullpen edge Philly."
-        },
-        {
-            "matchup": "Mariners @ Orioles",
-            "pitchers": "B. Woo vs C. Irvin",
-            "start_time_et": "1:35 PM ET",
-            "projected_flow": "Tight all game. Pitchers duel early. Extra-base edge Orioles."
-        },
-        {
-            "matchup": "White Sox @ Yankees",
-            "pitchers": "C. Flexen vs C. Rodón",
-            "start_time_et": "1:35 PM ET",
-            "projected_flow": "Yankees dominate early. White Sox unlikely to recover."
-        },
-        {
-            "matchup": "Twins @ Guardians",
-            "pitchers": "B. Ober vs B. Gaddis",
-            "start_time_et": "1:40 PM ET",
-            "projected_flow": "Guardians aggressive early. Twins take control midgame."
-        },
-        {
-            "matchup": "Angels @ Rangers",
-            "pitchers": "J. Soriano vs J. Gray",
-            "start_time_et": "2:35 PM ET",
-            "projected_flow": "Rangers build early lead. Angels rally 7th+. Edge Texas."
-        },
-        {
-            "matchup": "Pirates @ Cubs",
-            "pitchers": "J. Jones vs J. Taillon",
-            "start_time_et": "2:20 PM ET",
-            "projected_flow": "Pitchers solid. Late scoring decides it. Slight edge Cubs."
-        }
-    ]
+from scrapers.games import fetch_today_matchups
 
 def generate_cheatsheet(day: str):
-    matchups = get_may18_matchups()
+    matchups = fetch_today_matchups()
 
+    # Quick example confidence logic — replace with full model scoring later
     cheat_sheet = {
-        "Moneyline": [
-            Pick(label="Astros ML", confidence=9.25),
-            Pick(label="Phillies ML", confidence=8.90),
-            Pick(label="Guardians ML", confidence=8.60),
-        ],
-        "RunLine": [
-            Pick(label="Rays +1.5", confidence=9.30),
-            Pick(label="Cubs +1.5", confidence=8.85),
-        ],
-        "NRFI": [
-            Pick(label="NRFI – Brewers vs Astros", confidence=9.10),
-            Pick(label="NRFI – Pirates vs Cubs", confidence=8.60),
-        ],
-        "Hits": [
-            Pick(label="Luis Arraez 1+ Hit", confidence=9.35),
-            Pick(label="Trea Turner 1+ Hit", confidence=8.95),
-        ],
-        "HR": [
-            Pick(label="Aaron Judge HR", confidence=8.55),
-            Pick(label="Kyle Tucker HR", confidence=8.20),
-        ]
+        "Moneyline": [],
+        "RunLine": [],
+        "NRFI": [],
+        "Hits": [],
+        "HR": []
     }
 
+    for game in matchups:
+        home = game["matchup"].split("@")[1].strip()
+        away = game["matchup"].split("@")[0].strip()
+        home_team = home.split()[0]
+        away_team = away.split()[0]
+
+        # Sample logic — inject your model logic here
+        cheat_sheet["Moneyline"].append(Pick(label=f"{home_team} ML", confidence=8.7))
+        cheat_sheet["RunLine"].append(Pick(label=f"{away_team} +1.5", confidence=9.1))
+        cheat_sheet["NRFI"].append(Pick(label=f"NRFI – {game['matchup']}", confidence=8.9))
+        cheat_sheet["Hits"].append(Pick(label="Luis Arraez 1+ Hit", confidence=9.3))
+        cheat_sheet["HR"].append(Pick(label="Aaron Judge HR", confidence=8.2))
+
+    # Flatten and rank all picks
     all_picks = sorted(
         [(cat, p) for cat, plist in cheat_sheet.items() for p in plist],
         key=lambda x: x[1].confidence,
