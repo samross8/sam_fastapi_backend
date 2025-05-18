@@ -37,7 +37,7 @@ def generate_cheatsheet(day: str):
         return [p.dict() for _, p in all_picks if start <= p.confidence < end]
 
     parlay_suite = {
-        "best_bet": [all_picks[0][1].dict()],
+        "best_bet": [all_picks[0][1].dict()] if all_picks else [],
         "doubloon_doubler_1": tier(9.0, 9.3),
         "doubloon_doubler_2": tier(8.7, 9.0),
         "mini_lotto": tier(8.4, 8.7),
