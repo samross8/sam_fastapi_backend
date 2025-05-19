@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional  # ⬅️ make sure this is imported too
+from typing import Optional, List  # ⬅️ make sure this is imported too
 
 class Pick(BaseModel):
     label: str
