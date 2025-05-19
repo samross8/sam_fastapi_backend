@@ -66,18 +66,49 @@ def generate_cheatsheet(day: str) -> CheatSheetResponse:
         parlay_suite=parlay_suite
     )
 
-from scrapers.kbo import fetch_kbo_matchups
+from models import CheatSheetResponse, Pick
 
-def generate_kbo_cheatsheet():
-    matchups = fetch_kbo_matchups()
-
-    cheat_sheet = []
-    for game in matchups:
-        label = f"{game['matchup'].split('@')[1].strip()} ML"
-        confidence = 8.0 + (0.1 * len(game['matchup'])) % 1.5  # Simple seed logic
-        cheat_sheet.append(Pick(label=label, confidence=round(confidence, 2)))
-
-    return {
-        "slate_summary": matchups,
-        "cheatsheet": {"Moneyline": cheat_sheet}
+def generate_kbo_cheatsheet() -> CheatSheetResponse:
+    # ✅ This is placeholder data used for testing
+    picks = {
+        "Moneyline": [
+            Pick(label="Doosan Bears ML", confidence=8.9),
+            Pick(label="NC Dinos ML", confidence=8.7),
+            Pick(label="SSG Landers ML", confidence=8.6),
+        ],
+        "RunLine": [],
+        "NRFI": [],
+        "Hits": [],
+        "HR": []
     }
+
+    return CheatSheetResponse(
+        slate_summary=[
+            {
+                "matchup": "Doosan Bears @ LG Twins",
+                "pitchers": "R. Alcantara vs K. Young",
+                "start_time_et": "5:30 AM ET",
+                "projected_flow": "Doosan leads early. LG has bullpen edge late."
+            },
+            {
+                "matchup": "NC Dinos @ Hanwha Eagles",
+                "pitchers": "P. Krish vs J. Nam",
+                "start_time_et": "5:30 AM ET",
+                "projected_flow": "Low-scoring until 6th. NC offense wakes up mid-game."
+            },
+            {
+                "matchup": "SSG Landers @ Kiwoom Heroes",
+                "pitchers": "R. Wilkerson vs J. Hur",
+                "start_time_et": "5:30 AM ET",
+                "projected_flow": "SSG puts up runs early. Kiwoom keeps it close late."
+            }
+        ],
+        cheatsheet=picks,
+        parlay_suite={
+            "best_bet": [Pick(label="Doosan Bears ML", confidence=8.9).dict()],
+            "doubloon_doubler_1": [],
+            "doubloon_doubler_2": [],
+            "mini_lotto": [],
+            "lotto_play": []
+        }
+    )
