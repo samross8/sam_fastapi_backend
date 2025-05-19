@@ -1,18 +1,19 @@
-from typing import List, Dict
 from pydantic import BaseModel
+from typing import List
 
 class Pick(BaseModel):
     label: str
     confidence: float
-    recommended_wager: str
-
-class GameSummary(BaseModel):
-    matchup: str
-    pitchers: str
-    start_time_et: str
-    projected_flow: str
+    recommended_wager: str  # ✅ NEW FIELD
 
 class CheatSheetResponse(BaseModel):
-    slate_summary: List[GameSummary]
-    cheatsheet: Dict[str, List[Pick]]
-    parlay_suite: Dict[str, List[Pick]]
+    Moneyline: List[Pick]
+    RunLine: List[Pick]
+    NRFI: List[Pick]
+    Hits: List[Pick]
+    HR: List[Pick]
+
+class FullCheatSheetResponse(BaseModel):
+    slate_summary: List[dict]
+    cheatsheet: CheatSheetResponse
+    parlay_suite: dict
