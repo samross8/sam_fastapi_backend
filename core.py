@@ -70,12 +70,10 @@ from models import CheatSheetResponse, Pick
 
 def generate_kbo_cheatsheet() -> CheatSheetResponse:
     # ✅ This is placeholder data used for testing
-    picks = {
-        "Moneyline": [
-            Pick(label="Doosan Bears ML", confidence=8.9),
-            Pick(label="NC Dinos ML", confidence=8.7),
-            Pick(label="SSG Landers ML", confidence=8.6),
-        ],
+    picks = [
+    Pick(label="Doosan Bears ML", confidence=8.9, recommended_wager="2 units"),
+    # ...
+],
         "RunLine": [],
         "NRFI": [],
         "Hits": [],
