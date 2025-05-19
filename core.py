@@ -65,3 +65,19 @@ def generate_cheatsheet(day: str) -> CheatSheetResponse:
         cheatsheet=picks,
         parlay_suite=parlay_suite
     )
+
+from scrapers.kbo import fetch_kbo_matchups
+
+def generate_kbo_cheatsheet():
+    matchups = fetch_kbo_matchups()
+
+    cheat_sheet = []
+    for game in matchups:
+        label = f"{game['matchup'].split('@')[1].strip()} ML"
+        confidence = 8.0 + (0.1 * len(game['matchup'])) % 1.5  # Simple seed logic
+        cheat_sheet.append(Pick(label=label, confidence=round(confidence, 2)))
+
+    return {
+        "slate_summary": matchups,
+        "cheatsheet": {"Moneyline": cheat_sheet}
+    }

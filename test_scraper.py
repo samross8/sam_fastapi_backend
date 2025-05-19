@@ -1,3 +1,50 @@
+import requests
+from bs4 import BeautifulSoup
+from datetime import datetime
+import pytz
+
+url = "https://www.mlb.com/probable-pitchers"
+html = requests.get(url).text
+soup = BeautifulSoup(html, "html.parser")
+
+games = soup.select("section.probable-pitchers__matchup")
+
+now_et = datetime.now(pytz.timezone("US/Eastern"))
+
+print("\nTarget Date:", now_et.strftime("%A, %B %d"))
+
+for game in games:
+    try:
+        # Try direct header grab first
+        header = game.find("h2")
+        if header:
+            date_header = header.text.strip()
+        else:
+            date_header = game.get("data-date", "Unknown Date").strip()
+
+        # Check if date matches today
+        if now_et.strftime("%B %d").lower() not in date_header.lower():
+            continue
+
+        teams = game.select_one(".probable-pitchers__matchup__team--desktop")
+        if teams:
+            teams = teams.text.strip()
+        else:
+            continue
+
+        pitchers = game.select(".probable-pitchers__pitcher-name")
+        pitcher_names = [p.text.strip() for p in pitchers if p.text.strip()]
+        pitcher_str = " vs ".join(pitcher_names)
+
+        game_time_raw = game.select_one(".probable-pitchers__game-time").text.strip()
+        game_time = datetime.strptime(game_time_raw, "%I:%M %p")
+        game_time = game_time.replace(year=now_et.year, month=now_et.month, day=now_et.day)
+        game_time = pytz.timezone("US/Eastern").localize(game_time)
+
+        status = "(LIVE or upcoming)" if game_time >= now_et else "(already started)"
+        print(f"{teams} | {pitcher_str} | {game_time.strftime('%I:%M %p ET')} {status}")
+    except Exception as e:
+        print("Error parsing a matchup:", e)
 from bs4 import BeautifulSoup
 import requests
 from datetime import datetime

@@ -14,3 +14,7 @@ def get_tomorrow_cheatsheet():
 @app.get("/cheatsheet/preakness")
 def get_preakness_cheatsheet():
     return generate_preakness()
+
+@app.get("/cheatsheet/kbo")
+def get_kbo_cheatsheet():
+    return generate_kbo_cheatsheet()
