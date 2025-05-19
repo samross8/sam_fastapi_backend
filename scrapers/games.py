@@ -24,8 +24,9 @@ def fetch_today_matchups(debug=False):
                 away_team = game["teams"]["away"]["team"]["name"]
                 matchup = f"{away_team} @ {home_team}"
 
-                away_pitcher = game["teams"]["away"].get("probablePitcher", {}).get("fullName", "TBD")
-                home_pitcher = game["teams"]["home"].get("probablePitcher", {}).get("fullName", "TBD")
+                # ✅ Safe fallback if pitcher data is missing
+                away_pitcher = game["teams"]["away"].get("probablePitcher", {}).get("fullName") or "TBD"
+                home_pitcher = game["teams"]["home"].get("probablePitcher", {}).get("fullName") or "TBD"
                 pitchers = f"{away_pitcher} vs {home_pitcher}"
 
                 raw_time = game["gameDate"]
