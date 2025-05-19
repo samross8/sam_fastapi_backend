@@ -44,7 +44,7 @@ def generate_cheatsheet(day: str) -> CheatSheetResponse:
         parlay_suite=parlay_suite
     )
 
-def generate_kbo_cheatsheet() -> CheatSheetResponse:
+def generate_kbo_cheatsheet() -> FullCheatSheetResponse:
     # Placeholder KBO logic (to be replaced with real model logic)
     picks = [
         Pick(label="Doosan Bears ML", confidence=8.9, recommended_wager="2 units"),
