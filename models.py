@@ -1,10 +1,10 @@
 from pydantic import BaseModel
-from typing import List
+from typing import Optional  # ⬅️ make sure this is imported too
 
 class Pick(BaseModel):
     label: str
     confidence: float
-    recommended_wager: str  # ✅ NEW FIELD
+    recommended_wager: Optional[str] = None  # ✅ make it optional
 
 class CheatSheetResponse(BaseModel):
     Moneyline: List[Pick]
