@@ -46,9 +46,9 @@ def generate_cheatsheet(day: str) -> CheatSheetResponse:
 def generate_kbo_cheatsheet() -> CheatSheetResponse:
     # Placeholder KBO logic (to be replaced with real model logic)
     picks = [
-        Pick(label="Doosan Bears ML", confidence=8.9),
-        Pick(label="Samsung Lions ML", confidence=8.6),
-        Pick(label="LG Twins ML", confidence=8.4),
+        Pick(label="Doosan Bears ML", confidence=8.9, recommended_wager="2 units"),
+        Pick(label="Samsung Lions ML", confidence=8.6,  recommended_wager="2 units"),
+        Pick(label="LG Twins ML", confidence=8.4,  recommended_wager="2 units"),
     ]
 
     kbo_summary = [
