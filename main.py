@@ -1,5 +1,6 @@
 from fastapi import FastAPI
-from core import generate_cheatsheet, generate_kbo_cheatsheet
+from core import generate_cheatsheet
+# from core import generate_kbo_cheatsheet  # Temporarily disabled
 from models import FullCheatSheetResponse
 
 app = FastAPI()
@@ -16,9 +17,9 @@ def get_tomorrow_cheatsheet():
 def get_preakness_cheatsheet():
     return generate_preakness()
 
-@app.get("/cheatsheet/kbo", response_model=FullCheatSheetResponse)
-def get_kbo_cheatsheet():
-    return generate_kbo_cheatsheet()
+# @app.get("/cheatsheet/kbo", response_model=CheatSheetResponse)
+# def get_kbo_cheatsheet():
+#     return generate_kbo_cheatsheet()
 
 # from core import generate_kbo_cheatsheet  ← Comment this out
 
