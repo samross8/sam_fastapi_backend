@@ -1,5 +1,5 @@
 
-from models import Pick, CheatSheetResponse
+from models import Pick, CheatSheetResponse, FullCheatSheetResponse
 from datetime import datetime
 import pytz
 from scrapers.games import fetch_today_matchups
