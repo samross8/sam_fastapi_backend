@@ -1,17 +1,17 @@
 from pydantic import BaseModel
-from typing import Optional, List  # ⬅️ make sure this is imported too
+from typing import List, Optional
 
 class Pick(BaseModel):
     label: str
     confidence: float
-    recommended_wager: Optional[str] = None  # ✅ make it optional
+    recommended_wager: Optional[str] = None
 
 class CheatSheetResponse(BaseModel):
-    Moneyline: List[Pick]
-    RunLine: List[Pick]
-    NRFI: List[Pick]
-    Hits: List[Pick]
-    HR: List[Pick]
+    Moneyline: Optional[List[Pick]] = []
+    RunLine: Optional[List[Pick]] = []
+    NRFI: Optional[List[Pick]] = []
+    Hits: Optional[List[Pick]] = []
+    HR: Optional[List[Pick]] = []
 
 class FullCheatSheetResponse(BaseModel):
     slate_summary: List[dict]
