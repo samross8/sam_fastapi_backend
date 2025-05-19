@@ -1,21 +1,18 @@
-
-from models import Pick, CheatSheetResponse, FullCheatSheetResponse
+from models import Pick, FullCheatSheetResponse
 from datetime import datetime
 import pytz
 from scrapers.games import fetch_today_matchups
 
-def generate_cheatsheet(day: str) -> CheatSheetResponse:
-    # Simulated model output (this will eventually use real model logic)
+def generate_cheatsheet(day: str) -> FullCheatSheetResponse:
     sample_picks = [
-        Pick(label="Astros ML", confidence=9.2),
-        Pick(label="Phillies ML", confidence=8.8),
-        Pick(label="Guardians ML", confidence=8.7),
-        Pick(label="Rangers ML", confidence=8.5),
-        Pick(label="Tigers ML", confidence=8.3),
-        Pick(label="Mariners ML", confidence=8.1),
+        Pick(label="Astros ML", confidence=9.2, recommended_wager="3 units"),
+        Pick(label="Phillies ML", confidence=8.8, recommended_wager="2 units"),
+        Pick(label="Guardians ML", confidence=8.7, recommended_wager="2 units"),
+        Pick(label="Rangers ML", confidence=8.5, recommended_wager="2 units"),
+        Pick(label="Tigers ML", confidence=8.3, recommended_wager="1 unit"),
+        Pick(label="Mariners ML", confidence=8.1, recommended_wager="1 unit"),
     ]
 
-    # Sort and slice into parlay suite tiers
     sorted_picks = sorted(sample_picks, key=lambda p: p.confidence, reverse=True)
 
     def slice_conf(start, end):
@@ -26,13 +23,12 @@ def generate_cheatsheet(day: str) -> CheatSheetResponse:
         "doubloon_doubler_1": slice_conf(9.0, 9.3),
         "doubloon_doubler_2": slice_conf(8.7, 9.0),
         "mini_lotto": slice_conf(8.4, 8.7),
-        "lotto_play": slice_conf(0, 8.4),
+        "lotto_play": slice_conf(0, 8.4)
     }
 
-    # Real matchups for slate summary
     matchups = fetch_today_matchups()
 
-    return CheatSheetResponse(
+    return FullCheatSheetResponse(
         slate_summary=matchups,
         cheatsheet={
             "Moneyline": sample_picks,
@@ -45,11 +41,10 @@ def generate_cheatsheet(day: str) -> CheatSheetResponse:
     )
 
 def generate_kbo_cheatsheet() -> FullCheatSheetResponse:
-    # Placeholder KBO logic (to be replaced with real model logic)
     picks = [
         Pick(label="Doosan Bears ML", confidence=8.9, recommended_wager="2 units"),
-        Pick(label="Samsung Lions ML", confidence=8.6,  recommended_wager="2 units"),
-        Pick(label="LG Twins ML", confidence=8.4,  recommended_wager="2 units"),
+        Pick(label="Samsung Lions ML", confidence=8.6, recommended_wager="2 units"),
+        Pick(label="LG Twins ML", confidence=8.4, recommended_wager="2 units"),
     ]
 
     kbo_summary = [
@@ -63,9 +58,14 @@ def generate_kbo_cheatsheet() -> FullCheatSheetResponse:
             "pitchers": "D. Buchanan vs W. Kim",
             "start_time_et": "5:30 AM ET"
         },
+        {
+            "matchup": "LG Twins @ NC Dinos",
+            "pitchers": "C. Kelly vs S. Chang",
+            "start_time_et": "5:30 AM ET"
+        },
     ]
 
-    return CheatSheetResponse(
+    return FullCheatSheetResponse(
         slate_summary=kbo_summary,
         cheatsheet={
             "Moneyline": picks,
