@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from core import generate_cheatsheet, generate_kbo_cheatsheet
+from models import CheatSheetResponse
 
 app = FastAPI()
 
