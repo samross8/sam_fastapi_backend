@@ -43,7 +43,12 @@ def fetch_today_matchups(debug=False):
 
     games = []
     for entry in savant_data:
-        if entry.get("game_date") != today_str:
+        game_date = entry.get("game_date", "")
+        try:
+            parsed_date = datetime.strptime(game_date, "%Y-%m-%d").date()
+            if abs((parsed_date - now_et.date()).days) > 1:
+                continue
+        except:
             continue
 
         away = entry.get("away_team", "")
@@ -62,7 +67,7 @@ def fetch_today_matchups(debug=False):
         })
 
     if debug:
-        print(f"✅ Fetched {len(games)} matchups for {today_str}")
+        print(f"✅ Fetched {len(games)} matchups for ±1 day of {today_str}")
         for g in games:
             print(g)
 
@@ -112,7 +117,12 @@ def fetch_today_matchups(debug=False):
 
     games = []
     for entry in savant_data:
-        if entry.get("game_date") != today_str:
+        game_date = entry.get("game_date", "")
+        try:
+            parsed_date = datetime.strptime(game_date, "%Y-%m-%d").date()
+            if abs((parsed_date - now_et.date()).days) > 1:
+                continue
+        except:
             continue
 
         away = entry.get("away_team", "")
@@ -131,7 +141,7 @@ def fetch_today_matchups(debug=False):
         })
 
     if debug:
-        print(f"✅ Fetched {len(games)} matchups for {today_str}")
+        print(f"✅ Fetched {len(games)} matchups for ±1 day of {today_str}")
         for g in games:
             print(g)
 
