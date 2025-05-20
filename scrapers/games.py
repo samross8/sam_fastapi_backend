@@ -3,145 +3,51 @@ from datetime import datetime
 import pytz
 
 def fetch_today_matchups(debug=False):
-    eastern = pytz.timezone("US/Eastern")
-    now_et = datetime.now(eastern)
-    today_str = now_et.strftime("%Y-%m-%d")
-
-    # Pull start times from MLB schedule
-    schedule_url = f"https://statsapi.mlb.com/api/v1/schedule?sportId=1&date={today_str}"
+    url = "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard"
     try:
-        schedule_resp = requests.get(schedule_url)
-        schedule_data = schedule_resp.json()
+        response = requests.get(url)
+        data = response.json()
     except Exception as e:
         if debug:
-            print("❌ Error fetching schedule:", e)
-        return []
-
-    game_times = {}
-    for date_block in schedule_data.get("dates", []):
-        for game in date_block.get("games", []):
-            home_team = game["teams"]["home"]["team"]["name"]
-            away_team = game["teams"]["away"]["team"]["name"]
-            raw_time = game["gameDate"]
-            try:
-                game_dt = datetime.strptime(raw_time, "%Y-%m-%dT%H:%M:%SZ")
-                game_dt_et = pytz.utc.localize(game_dt).astimezone(eastern)
-                game_times[(away_team, home_team)] = game_dt_et.strftime("%-I:%M %p ET")
-            except Exception as e:
-                if debug:
-                    print("⚠️ Error parsing time:", e)
-
-    # Pull pitcher info from Baseball Savant
-    savant_url = "https://baseballsavant.mlb.com/probable-pitchers.json"
-    try:
-        savant_resp = requests.get(savant_url)
-        savant_data = savant_resp.json()
-    except Exception as e:
-        if debug:
-            print("❌ Error fetching savant data:", e)
+            print("❌ Error fetching ESPN data:", e)
         return []
 
     games = []
-    for entry in savant_data:
-        game_date = entry.get("game_date", "")
-        try:
-            parsed_date = datetime.strptime(game_date, "%Y-%m-%d").date()
-            if abs((parsed_date - now_et.date()).days) > 1:
-                continue
-        except:
-            continue
-
-        away = entry.get("away_team", "")
-        home = entry.get("home_team", "")
-        away_pitcher = entry.get("away_probable_pitcher", "TBD")
-        home_pitcher = entry.get("home_probable_pitcher", "TBD")
-
-        matchup = f"{away} @ {home}"
-        pitchers = f"{away_pitcher} vs {home_pitcher}"
-        start_time_et = game_times.get((away, home), "TBD")
-
-        games.append({
-            "matchup": matchup,
-            "pitchers": pitchers,
-            "start_time_et": start_time_et
-        })
-
-    if debug:
-        print(f"✅ Fetched {len(games)} matchups for ±1 day of {today_str}")
-        for g in games:
-            print(g)
-
-    return games
-import requests
-from datetime import datetime
-import pytz
-
-def fetch_today_matchups(debug=False):
     eastern = pytz.timezone("US/Eastern")
-    now_et = datetime.now(eastern)
-    today_str = now_et.strftime("%Y-%m-%d")
+    today = datetime.now(eastern).date()
 
-    # Pull start times from MLB schedule
-    schedule_url = f"https://statsapi.mlb.com/api/v1/schedule?sportId=1&date={today_str}"
-    try:
-        schedule_resp = requests.get(schedule_url)
-        schedule_data = schedule_resp.json()
-    except Exception as e:
-        if debug:
-            print("❌ Error fetching schedule:", e)
-        return []
-
-    game_times = {}
-    for date_block in schedule_data.get("dates", []):
-        for game in date_block.get("games", []):
-            home_team = game["teams"]["home"]["team"]["name"]
-            away_team = game["teams"]["away"]["team"]["name"]
-            raw_time = game["gameDate"]
-            try:
-                game_dt = datetime.strptime(raw_time, "%Y-%m-%dT%H:%M:%SZ")
-                game_dt_et = pytz.utc.localize(game_dt).astimezone(eastern)
-                game_times[(away_team, home_team)] = game_dt_et.strftime("%-I:%M %p ET")
-            except Exception as e:
-                if debug:
-                    print("⚠️ Error parsing time:", e)
-
-    # Pull pitcher info from Baseball Savant
-    savant_url = "https://baseballsavant.mlb.com/probable-pitchers.json"
-    try:
-        savant_resp = requests.get(savant_url)
-        savant_data = savant_resp.json()
-    except Exception as e:
-        if debug:
-            print("❌ Error fetching savant data:", e)
-        return []
-
-    games = []
-    for entry in savant_data:
-        game_date = entry.get("game_date", "")
+    for event in data.get("events", []):
         try:
-            parsed_date = datetime.strptime(game_date, "%Y-%m-%d").date()
-            if abs((parsed_date - now_et.date()).days) > 1:
+            competitions = event.get("competitions", [])[0]
+            competitors = competitions.get("competitors", [])
+
+            away_team = next((c for c in competitors if c["homeAway"] == "away"), {})
+            home_team = next((c for c in competitors if c["homeAway"] == "home"), {})
+
+            away_name = away_team.get("team", {}).get("displayName", "")
+            home_name = home_team.get("team", {}).get("displayName", "")
+
+            away_pitcher = away_team.get("probables", [{}])[0].get("fullName", "TBD")
+            home_pitcher = home_team.get("probables", [{}])[0].get("fullName", "TBD")
+
+            game_time_raw = competitions.get("date")
+            dt = datetime.fromisoformat(game_time_raw.replace("Z", "+00:00"))
+            dt_et = dt.astimezone(eastern)
+            if dt_et.date() != today:
                 continue
-        except:
+
+            games.append({
+                "matchup": f"{away_name} @ {home_name}",
+                "pitchers": f"{away_pitcher} vs {home_pitcher}",
+                "start_time_et": dt_et.strftime("%-I:%M %p ET")
+            })
+        except Exception as e:
+            if debug:
+                print("⚠️ Error parsing game:", e)
             continue
 
-        away = entry.get("away_team", "")
-        home = entry.get("home_team", "")
-        away_pitcher = entry.get("away_probable_pitcher", "TBD")
-        home_pitcher = entry.get("home_probable_pitcher", "TBD")
-
-        matchup = f"{away} @ {home}"
-        pitchers = f"{away_pitcher} vs {home_pitcher}"
-        start_time_et = game_times.get((away, home), "TBD")
-
-        games.append({
-            "matchup": matchup,
-            "pitchers": pitchers,
-            "start_time_et": start_time_et
-        })
-
     if debug:
-        print(f"✅ Fetched {len(games)} matchups for ±1 day of {today_str}")
+        print(f"✅ Found {len(games)} games on ESPN")
         for g in games:
             print(g)
 
